@@ -24,7 +24,22 @@ public class Dome extends Shape {
 	
 	@Override
 	public Hit intersect(Ray ray) {
-		//TODO: implement this method.
-		throw new UnimplementedMethodException("intersect(Ray)");
+		Hit sphereHit = sphere.intersect(ray);
+		if (sphereHit == null) {
+		    return null;
+        }
+
+        Point hitPointS = ray.source().add(sphereHit.t(), ray.direction());
+		if (plain.normal().dot(hitPointS.toVec()) >= 0) {
+		    return sphereHit;
+        }
+
+        Hit plainHit = plain.intersect(ray);
+		Point hitPointP = ray.source().add(plainHit.t(), ray.direction());
+        if(hitPointP.dist(sphere.getCenter()) < sphere.getRadius()) {
+            return plainHit;
+        }
+
+        return null;
 	}
 }

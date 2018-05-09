@@ -19,6 +19,14 @@ public class Sphere extends Shape {
 		this(new Point(0, -0.5, -6), 0.5);
 	}
 	
+	public Point getCenter(){
+		return center;
+	}
+
+	public double getRadius() {
+		return radius;
+	}
+
 	@Override
 	public String toString() {
 		String endl = System.lineSeparator();
@@ -36,6 +44,7 @@ public class Sphere extends Shape {
 		this.radius = radius;
 		return this;
 	}
+	
 	
 	@Override
 	public Hit intersect(Ray ray) {
