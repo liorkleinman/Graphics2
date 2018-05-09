@@ -108,7 +108,35 @@ public class Plain extends Shape {
 
 	@Override
 	public Hit intersect(Ray ray) {
-		//TODO: implement this method.
-		throw new UnimplementedMethodException("intersect(Ray)");
+		Vec vector = new Vec(this.a, this.b, this.c);
+		Vec n = this.normal;
+		Point p0 = ray.source();
+
+		double t = -(substitutingP(p0, vector, this.d, n, ray));
+
+		Hit intersect = null;
+		// TODO: check if max value is good
+		if (t > 0 && t < Double.MAX_VALUE) {
+			intersect = new Hit (t, n);
+		}
+
+		return intersect;
 	}
+
+	 public double substitutingP(Point p0, Vec vector, double d, Vec n, Ray ray) {
+	 	double substituting;
+	 	substituting = (n.dot(p0.toVec()) + d) / (n.dot(ray.direction()));
+
+        return substituting;
+    }
+
+    public Vec normal (Ray ray) {
+    	Vec vector;
+    	if (ray.direction().dot(this.normal()) > 0) {
+    		vector = this.normal().neg();
+    	} else {
+    		vector = this.normal();
+		}
+		return vector;
+    }
 }

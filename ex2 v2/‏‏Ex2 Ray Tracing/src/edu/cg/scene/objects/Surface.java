@@ -29,7 +29,14 @@ public class Surface implements Intersectable {
 	
 	@Override
 	public Hit intersect(Ray ray) {
-		//TODO: implement this method.
+		Hit intersect = shape.intersect(ray);
+		if (intersect == null) {
+			return null;
+		} else {
+			intersect.setSurface(this);
+		}
+		
+
 		throw new UnimplementedMethodException("intersect(Ray)");
 	}
 	
