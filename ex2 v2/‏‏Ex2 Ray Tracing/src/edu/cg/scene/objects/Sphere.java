@@ -4,6 +4,7 @@ import edu.cg.UnimplementedMethodException;
 import edu.cg.algebra.Hit;
 import edu.cg.algebra.Point;
 import edu.cg.algebra.Ray;
+import edu.cg.algebra.Vec;
 
 public class Sphere extends Shape {
 	private Point center;
@@ -38,7 +39,28 @@ public class Sphere extends Shape {
 	
 	@Override
 	public Hit intersect(Ray ray) {
-		//TODO: implement this method.
-		throw new UnimplementedMethodException("intersect(Ray)");
+		Point p0 = ray.source();
+		Vec v = ray.direction();
+		double aCoeff = 1;
+		double bCoeff = v.mult(2).dot(p0.sub(this.center));
+		double cCoeff =	p0.distSqr(this.center) - (this.radius * this.radius);
+		double delta = Math.sqrt((bCoeff * bCoeff) - 4 * aCoeff * cCoeff);
+		
+		// if delta < 0 there is not hit
+		if (Double.isNaN(delta)){
+			return null;
+		} 
+
+		double largerX = ((-1 * bCoeff) + delta) / 2.0;
+		double smallerX = ((-1 * bCoeff) - delta) / 2.0;
+
+		double t = smallerX < 0 ? largerX : smallerX;
+		//  if the larger solution of the equation is negative, there is not hit
+		if (largerX < 0 || Double.isNaN(t)){
+			return null;
+		} 
+		Vec normal = ray.add(t).sub(this.center).normalize() ;
+		//TODO check if neg() in case of choosing the largerX
+		return new Hit (t, normal);
 	}
 }
