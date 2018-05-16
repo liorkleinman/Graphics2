@@ -11,6 +11,8 @@ import java.util.concurrent.Future;
 
 import edu.cg.Logger;
 import edu.cg.UnimplementedMethodException;
+import edu.cg.algebra.Hit;
+import edu.cg.algebra.Ops;
 import edu.cg.algebra.Point;
 import edu.cg.algebra.Ray;
 import edu.cg.algebra.Vec;
@@ -196,8 +198,68 @@ public class Scene {
 	}
 	
 	private Vec calcColor(Ray ray, int recusionLevel) {
+		Hit closestHit = intersaction(ray);
+		if(closestHit == null){
+			return this.backgroundColor;
+		}
+		Surface surface = closestHit.getSurface();
+		Vec color = surface.Ka().mult(this.ambient);
 
+		color.add(getLightImpect(closestHit));
 
-		throw new UnimplementedMethodException("calcColor(Ray, int)");
+		if (this.renderReflections) {
+			color.add(getReflectionsColor(closestHit, ray, recusionLevel));
+		}
+
+		if (this.renderRefarctions) {
+			color.add(getRefarctionsColor(closestHit, ray, recusionLevel));
+		}
+		return color;
 	}
+
+	
+	private Vec getLightImpect(Hit closestHit){
+		for (Light light : lightSources){
+			if(!light.isBlockedBy()){
+				Vec color = getDeffuseColor(closestHit)
+			}
+
+		}
+	}
+
+	private Hit intersaction(Ray ray){
+		Hit minHit = null;
+		double minDistance = Double.MAX_VALUE;
+		for (Surface surface : surfaces) {
+			Hit currentSurfaceHit = surface.intersect(ray);
+			if (currentSurfaceHit != null && currentSurfaceHit.t() <= minDistance){
+				minDistance = currentSurfaceHit.t();
+				minHit = currentSurfaceHit;
+				//TODO set surface?
+			} 	
+		}
+			return minHit;
+	}
+
+	private Vec getReflectionsColor(Hit closestHit, Ray ray, int recusionLevel) {
+		Surface surface = closestHit.getSurface();
+		Point hittingPoint = ray.getHittingPoint(closestHit);
+		Vec refrectionColor = Ops.reflect(ray.direction(), closestHit.getNormalToSurface());
+		Vec Weight = surface.Ks().mult(surface.reflectionIntensity());
+		return  calcColor(new Ray(hittingPoint, refrectionColor),
+			recusionLevel + 1).mult(Weight);
+	}
+
+	private Vec getRefarctionsColor(Hit closestHit, Ray ray, int recusionLevel) {
+		Surface surface = closestHit.getSurface();
+		Point hittingPoint = ray.getHittingPoint(closestHit);
+		double WithInSurface1 = surface.n1(closestHit);
+		double WithInSurface2 = surface.n2(closestHit);
+		Vec direction = Ops.refract(ray.direction(), closestHit.getNormalToSurface(), 
+			WithInSurface1, WithInSurface2);
+		Vec Weight = surface.Kt().mult(surface.refractionIntensity());
+		return  calcColor(new Ray(hittingPoint, direction),
+				 recusionLevel + 1).mult(Weight);
+	}
+
 }

@@ -24,19 +24,19 @@ public class Dome extends Shape {
 	
 	@Override
 	public Hit intersect(Ray ray) {
-		Hit sphereHit = sphere.intersect(ray);
-		if (sphereHit == null) {
+		Hit hitSphere = sphere.intersect(ray);
+		if (hitSphere == null) {
 		    return null;
         }
 
-        Point hitPointS = ray.source().add(sphereHit.t(), ray.direction());
+        Point hitPointS = ray.source().add(hitSphere.t(), ray.direction());
 		if (plain.normal().dot(hitPointS.toVec()) >= 0) {
-		    return sphereHit;
+		    return hitSphere;
         }
-
+		// TODO: check if irelevent
         Hit plainHit = plain.intersect(ray);
 		Point hitPointP = ray.source().add(plainHit.t(), ray.direction());
-        if(hitPointP.dist(sphere.getCenter()) < sphere.getRadius()) {
+        if(hitPointP.dist(sphere.getCenter()) - sphere.getRadius() <  0) {
             return plainHit;
         }
 
