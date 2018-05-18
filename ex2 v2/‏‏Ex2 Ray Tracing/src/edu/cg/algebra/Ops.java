@@ -93,10 +93,10 @@ public class Ops {
 		return Double.isFinite(p.x) & Double.isFinite(p.y) & Double.isFinite(p.z);
 	}
 	
-	public static Vec reflect(Vec u, Vec normal) {
-		//TODO: implement
-		throw new UnimplementedMethodException("Ops.reflect(Vec, Vec)");
-	}
+    public static Vec reflect(Vec u, Vec normal) {
+        return add(u, mult(-2.0D * dot(u, normal), normal));
+    }
+
 	
 	public static Vec refract(Vec u, Vec normal, double n1, double n2) {
 		//TODO: Bonus implementation

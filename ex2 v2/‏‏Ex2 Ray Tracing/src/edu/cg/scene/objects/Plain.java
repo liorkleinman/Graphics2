@@ -109,7 +109,7 @@ public class Plain extends Shape {
 	@Override
 	public Hit intersect(Ray ray) {
 		Vec vector = new Vec(this.a, this.b, this.c);
-		Vec n = this.normal;
+		Vec n = this.normal();
 		Point p0 = ray.source();
 
 		double t = -(substitutingP(p0, vector, this.d, n, ray));

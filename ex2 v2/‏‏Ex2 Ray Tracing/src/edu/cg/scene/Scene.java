@@ -10,7 +10,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import edu.cg.Logger;
-import edu.cg.UnimplementedMethodException;
 import edu.cg.algebra.Hit;
 import edu.cg.algebra.Ops;
 import edu.cg.algebra.Point;
@@ -222,27 +221,51 @@ public class Scene {
 		Vec TotalLightImpact = new Vec();
 		for (Light light : lightSources){
 			if(!light.isBlocked(surfaces, ray, closestHit)){
-				Vec color = getDeffuseEffect(closestHit, ray);
-				color = color.add(getSpecularEffect(closestHit, ray));
-				TotalLightImpact = TotalLightImpact.add(color.mult(light.getIntensity(closestHit, ray)));
+				Point hitPoint = ray.add(closestHit.t());
+				Vec ligthColor = getDeffuseEffect(light, closestHit, ray);
+				ligthColor = ligthColor.add(getSpecularEffect(light, closestHit, ray));
+				TotalLightImpact = TotalLightImpact.add(ligthColor.mult(light.getIntensity(hitPoint)));
 			}
-
-
 		}
+		return TotalLightImpact;
+	}
+	
+	private Vec getSpecularEffect(Light light, Hit closestHit, Ray ray){
+		Surface closetSurface = closestHit.getSurface();
+		Point ClosetSurfaceHitPoint = ray.add(closestHit.t());
+		Vec ks = closetSurface.Ks();
+		double n = closetSurface.shininess();
+		Vec R = Ops.reflect(light.intersactionToLight(ClosetSurfaceHitPoint), closestHit.getNormalToSurface());
+		Vec LightSourceIntensity = light.getIntensity(ClosetSurfaceHitPoint);
+		Vec V = (camera.sub(ClosetSurfaceHitPoint)).normalize();
+		return ks.mult(Math.pow(V.dot(R), n)).mult(LightSourceIntensity);
 	}
 
+	private Vec getDeffuseEffect (Light light, Hit hit, Ray ray) {
+		Point closesSurfaceHitPoint = ray.add(hit.t());
+		Vec N = hit.getNormalToSurface();
+		Vec L = light.intersactionToLight(closesSurfaceHitPoint);
+		double NL = N.dot(L);
+		Vec kd = hit.getSurface().Kd(closesSurfaceHitPoint);
+		Vec kdNL = kd.mult(NL);
+	
+		return kdNL.mult(light.getIntensity(closesSurfaceHitPoint));
+	}
+	
 	private Hit intersaction(Ray ray){
 		Hit minHit = null;
 		double minDistance = Double.MAX_VALUE;
+		Surface minSurface = null;	
 		for (Surface surface : surfaces) {
 			Hit currentSurfaceHit = surface.intersect(ray);
 			if (currentSurfaceHit != null && currentSurfaceHit.t() <= minDistance){
+				minSurface = surface;
 				minDistance = currentSurfaceHit.t();
 				minHit = currentSurfaceHit;
-				//TODO set surface?
 			} 	
 		}
-			return minHit;
+		minHit.setSurface(minSurface);
+		return minHit;
 	}
 
 	private Vec getReflectionsColor(Hit closestHit, Ray ray, int recusionLevel) {

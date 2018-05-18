@@ -2,6 +2,10 @@ package edu.cg.scene.lightSources;
 
 import edu.cg.algebra.Point;
 import edu.cg.algebra.Vec;
+import edu.cg.algebra.Ray;
+
+import edu.cg.scene.objects.Surface;
+
 
 public class Spotlight extends PointLight {
 	private Vec direction;
@@ -40,6 +44,18 @@ public class Spotlight extends PointLight {
 	public Spotlight initDecayFactors(double q, double l, double c) {
 		return (Spotlight)super.initDecayFactors(q, l, c);
 	}
+
+	@Override
+	public Vec getIntensity(Point intersactionPoint) {
+        Vec intersactionToLight = this.intersactionToLight(intersactionPoint);
+        double cosValOfAngle = direction.normalize().dot(intersactionToLight);
+		if (cosValOfAngle < angle) {
+			return new Vec(0);
+		}
+        return intensity.mult(getDecay(intersactionPoint) * cosValOfAngle);
+    }
 	
+
+
 	//TODO: add some methods
 }

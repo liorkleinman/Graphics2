@@ -2,6 +2,9 @@ package edu.cg.scene.lightSources;
 
 import edu.cg.algebra.Point;
 import edu.cg.algebra.Vec;
+import edu.cg.algebra.Hit;
+import edu.cg.algebra.Ray;
+import edu.cg.scene.objects.Surface;
 
 public class PointLight extends Light {
 	protected Point position;
@@ -41,5 +44,31 @@ public class PointLight extends Light {
 		return this;
 	}
 
-	//TODO: add some methods
+	public boolean isBlockedBySurface(Surface surface, Ray ray){
+		Hit hit = surface.intersect(ray);
+		if (hit == null) {
+			return false;
+		} 
+		Point source = ray.source();	
+		Point hittingPoint = ray.getHittingPoint(hit);
+		return source.distSqr(this.position) - source.distSqr(hittingPoint) > 0;
+	}
+	
+	
+	protected double getDecay(Point p) {
+		double d = position.dist(p);
+		double decay = kc + (kl * d) + (kq * d * d);
+		// TODO: check with 1.0
+		return ((double) 1 / decay);
+	}
+
+	@Override
+	public Vec intersactionToLight(Point p){
+		return p.sub(position).normalize();
+	}
+
+	@Override
+	public Vec getIntensity(Point intersactionPoint) {
+		return intensity.mult(getDecay(intersactionPoint));
+	}
 }
