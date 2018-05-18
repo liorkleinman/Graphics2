@@ -205,7 +205,7 @@ public class Scene {
 		Surface surface = closestHit.getSurface();
 		Vec color = surface.Ka().mult(this.ambient);
 
-		color.add(getLightImpect(closestHit));
+		color.add(getLightImpect(closestHit, ray));
 
 		if (this.renderReflections) {
 			color.add(getReflectionsColor(closestHit, ray, recusionLevel));
@@ -218,11 +218,15 @@ public class Scene {
 	}
 
 	
-	private Vec getLightImpect(Hit closestHit){
+	private Vec getLightImpect(Hit closestHit, Ray ray){
+		Vec TotalLightImpact = new Vec();
 		for (Light light : lightSources){
-			if(!light.isBlockedBy()){
-				Vec color = getDeffuseColor(closestHit)
+			if(!light.isBlocked(surfaces, ray, closestHit)){
+				Vec color = getDeffuseEffect(closestHit, ray);
+				color = color.add(getSpecularEffect(closestHit, ray));
+				TotalLightImpact = TotalLightImpact.add(color.mult(light.getIntensity(closestHit, ray)));
 			}
+
 
 		}
 	}

@@ -15,6 +15,8 @@ public abstract class Light {
 		this.intensity = intensity;
 		return this;
 	}
+
+	public 
 	
 	//TODO: add some methods
 }
